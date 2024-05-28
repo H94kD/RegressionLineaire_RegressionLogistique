@@ -1,0 +1,122 @@
+import pandas as pd
+import matplotlib.pyplot as plt
+import requests
+from bs4 import BeautifulSoup
+import re
+
+
+# Recupérer les Urls de chaque page
+
+def get_all_pages(): # cette fonction va recupérer les urls de chaque page et les stocker                       									dans une liste
+    urls = []
+    for i in range(1, 51):
+        #print(f"https://books.toscrape.com/catalogue/page-{i}.html")
+        urls.append(f"https://books.toscrape.com/catalogue/page-{i}.html")
+    return urls
+
+#############
+listLiens = get_all_pages()# On a bien nos 50 adresses
+listLiens
+
+
+######### Une fonction qui va renvoyer l'url de chaque livre
+def urlsLivres(urlsPage):
+    urlsDesLivres = []
+    for url in urlsPage:
+        r = requests.get(url)
+        soup = BeautifulSoup(r.content, "html.parser")
+        livres = soup.find_all("article", class_= "product_pod")
+        for livre in livres:
+            urlsDesLivres.append("https://books.toscrape.com/catalogue/" + livre.a.get("href"))
+    return urlsDesLivres
+
+########
+urlsDesLivres = urlsLivres(listLiens) # on stocke les liens dans une liste
+
+########
+# Initialisation de toutes les listes qui serviront à créer un dictionnaire
+listsTitre = []
+listsCategorie = []
+listsNotes = []
+listsQte = []
+listsprixHT = []
+listsprixTTC = []
+liststaxes = []
+listsNbrRevues = []
+#########
+
+# On va scraper toutes les pages des livres
+for lien in urlsDesLivres:
+    r = requests.get(lien)
+    soup = BeautifulSoup(r.content, "html.parser")
+    listsTitre.append(soup.find("h1").text.strip()) # On scrape le titre du livre
+    
+    # Scrapind du nom de la catégorie
+    menu = soup.find("ul" , class_= "breadcrumb")
+    menu.select("li")
+    listsCategorie.append(menu.select("a")[2].text.strip())
+    
+    # scraping de la note
+    note = soup.find("div", class_= "col-sm-6 product_main")
+    listsNotes.append(note.select("p")[2].get("class")[1])
+    
+    # Scraping de la qté
+    listsQte.append(soup.find("p", class_="instock availability").text.strip())
+    
+    # Scraping du prix HT
+    table = soup.find("table", class_= "table table-striped")
+    listsprixHT.append(table.select("tr")[2].text.strip())
+    
+    # Scraping du prix TTC 
+    listsprixTTC.append(table.select("tr")[3].text.strip())
+    
+    # Scraping de la valeur de la taxe
+    liststaxes.append(table.select("tr")[4].text.strip())
+    
+    # Scraping du nombre de revue
+    listsNbrRevues.append(table.select("tr")[6].text.strip())
+
+# On crée un dictionnaire à partir des listes précédentes
+
+dicoData = {
+        "Categorie"   : listsCategorie,
+        "Titre du livre" : listsTitre,
+        "Notes"        : listsNotes,
+        "Quantité"     : listsQte,
+        "Prix HT"      : listsprixHT,
+        "Prix TTC"     : listsprixTTC,
+        "Taxes"        : liststaxes,
+        "Nombre de revues" : listsNbrRevues
+}
+
+######## On crée un dataframe à partir du dictionnaire
+datasglob = pd.DataFrame(dicoData)
+
+######### Formatage des colonnes du dataframe
+# La colonne "Notes"
+datasglob["Notes"] = datasglob["Notes"].str.replace("One","1", regex =False)
+datasglob["Notes"] = datasglob["Notes"].str.replace("Two","2", regex =False)
+datasglob["Notes"] = datasglob["Notes"].str.replace("Three","3", regex =False)
+datasglob["Notes"] = datasglob["Notes"].str.replace("Four","4", regex =False)
+datasglob["Notes"] = datasglob["Notes"].str.replace("Five","5", regex =False)
+datasglob["Notes"] = datasglob["Notes"].astype(int)
+
+# La colonne "Quantité"
+datasglob["Quantité"] = datasglob["Quantité"].str.replace("In stock (", "", regex = False)
+datasglob["Quantité"] = datasglob["Quantité"].str.replace(" available)", "", regex = False)
+datasglob["Quantité"] = datasglob["Quantité"].astype(int)
+
+# Les colonnes des prix
+datasglob["Prix HT"] = datasglob["Prix HT"].str.replace("Price (excl. tax)£", "", regex = False)
+datasglob["Prix TTC"] = datasglob["Prix TTC"].str.replace("Price (incl. tax)£", "", regex = False)
+datasglob["Prix HT"] = datasglob["Prix HT"].astype(float)
+datasglob["Prix TTC"] = datasglob["Prix TTC"].astype(float)
+
+# La colonne des revues 
+
+datasglob["Nombre de revues"] = datasglob["Nombre de revues"].str.replace("Number of reviews\n", "", regex=False)
+datasglob["Nombre de revues"] = datasglob["Nombre de revues"].astype(int)
+
+
+
+

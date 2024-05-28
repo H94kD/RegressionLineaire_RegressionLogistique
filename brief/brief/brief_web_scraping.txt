@@ -1,0 +1,32 @@
+ENONCE DU TRAVAIL ////////////////////////////////////////////////////////////
+
+La startup Gold Tech Analysis, Spécialisée dans l'analyse de données vous à recrutée en tant Data Analyst afin de répondre au problématique métier rencontré au quotidien. Vous êtes donc impliqué dans l'un de ses multiples projets et votre Job consiste, pour l'un des ses clients ayant un site de E-commerce, à extraire, reconstituer la base de données et analyser les données dans le but de proposer des graphes décisionnels au client. 
+
+//
+
+CONTEXTE ET TRAVAIL A FAIRE
+////////////////////////////////////////////////////////////
+
+En tant que en tant que Data Analyst, il sera question pour vous d'effectuer les taches suivantes:
+
+Planification et organisation du travail en groupe
+Extraction des données d'un site de E-commerce à l'aide de la bibliothèque python Beautiful Soup
+Reconstitution et mise en place de la base de données à l'aide du SQL
+Faire une analyse descriptive sur les données disponibles dans votre base de donnée ou sur un fichier csv
+Visualisation:
+les 10 produits les plus couteux
+les 10 produits les moins couteux
+les 10 produits les plus recommandés
+les 10 produits les moins recommandés
+les 5 catégories ayant le plus de produits en stocks
+les trois catégories ayant les produits les plus couteux
+
+//
+
+LIVRABLES ATTENDUS
+////////////////////////////////////////////////////////////
+
+Un dépôt git contenant/
+- le code source
+- un rapport du travail effectué
+- fichier SQL de la base de donnée
